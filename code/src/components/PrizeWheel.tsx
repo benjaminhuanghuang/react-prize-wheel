@@ -157,7 +157,6 @@ const PrizeWheel = () => {
   };
 
   const spin = () => {
-    console.log('spin');
     isSpinningRef.current = true;
     currentDegreeRef.current = 0;
     maxRotationRef.current = randomRotation();
