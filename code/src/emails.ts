@@ -3,42 +3,52 @@ import { Email } from './types';
 export const emails: Email[] = [
   {
     fullName: 'John Smith',
-    email: 'john.smith@example.com',
+    emailAddress: 'john.smith@example.com',
+    selected: true,
   },
   {
     fullName: 'Jane Doe',
-    email: 'jane.doe@example.com',
+    emailAddress: 'jane.doe@example.com',
+    selected: true,
   },
   {
     fullName: 'Michael Johnson',
-    email: 'michael.johnson@example.com',
+    emailAddress: 'michael.johnson@example.com',
+    selected: true,
   },
   {
     fullName: 'Sarah Lee',
-    email: 'sarah.lee@example.com',
+    emailAddress: 'sarah.lee@example.com',
+    selected: true,
   },
   {
     fullName: 'David Brown',
-    email: 'david.brown@example.com',
+    emailAddress: 'david.brown@example.com',
+    selected: true,
   },
   {
     fullName: 'Emily Davis',
-    email: 'emily.davis@example.com',
+    emailAddress: 'emily.davis@example.com',
+    selected: true,
   },
   {
     fullName: 'Christopher Wilson',
-    email: 'christopher.wilson@example.com',
+    emailAddress: 'christopher.wilson@example.com',
+    selected: true,
   },
   {
     fullName: 'Laura Martinez',
-    email: 'laura.martinez@example.com',
+    emailAddress: 'laura.martinez@example.com',
+    selected: true,
   },
   {
     fullName: 'Daniel Garcia',
-    email: 'daniel.garcia@example.com',
+    emailAddress: 'daniel.garcia@example.com',
+    selected: true,
   },
   {
     fullName: 'Sophia Lopez',
-    email: 'sophia.lopez@example.com',
+    emailAddress: 'sophia.lopez@example.com',
+    selected: true,
   },
 ];

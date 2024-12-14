@@ -1,6 +1,7 @@
 export interface Email {
-    email: string;
+    emailAddress: string;
     fullName: string;
+    selected: boolean;
 }
 
 export interface Color {

@@ -1,7 +1,6 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
 import useAudio from '../hooks/useAudio';
 import { Color } from '../types';
-import { emails } from '../emails';
 import {
   randomColors,
   toRadius,
@@ -14,11 +13,15 @@ import Popup from './Popup';
 import pointer from '../assets/pointer.svg';
 import cheering from '../assets/cheering.mp3';
 import spinmp3 from '../assets/spin.mp3';
+// Context
+import { useAppContext } from '../appContext';
 
 const RADIUS = 400; // Wheel radius
 
 const PrizeWheel = () => {
   console.log('PrizeWheel is re-render');
+  const { filteredMailList } = useAppContext();
+
   const [isSheeringPlaying, toggleSheeringPlay] = useAudio(cheering);
   const [isSpinPlaying, toggleSpinPlay] = useAudio(spinmp3);
 
@@ -68,9 +71,9 @@ const PrizeWheel = () => {
     ctx.fill();
 
     // Draw the wheel segments
-    for (let i = 0; i < emails.length; i++) {
-      const startDegree = itemDegreesRef.current[emails[i].email].startDegree;
-      const endDegree = itemDegreesRef.current[emails[i].email].endDegree;
+    for (let i = 0; i < filteredMailList.length; i++) {
+      const startDegree = itemDegreesRef.current[filteredMailList[i].emailAddress].startDegree;
+      const endDegree = itemDegreesRef.current[filteredMailList[i].emailAddress].endDegree;
       const color = colorsRef.current[i];
       const colorStyle = `rgb(${color.r},${color.g},${color.b})`;
       // slightly darker
@@ -108,24 +111,24 @@ const PrizeWheel = () => {
       ctx.fillStyle =
         color.r > 150 || color.g > 150 || color.b > 150 ? '#000' : '#fff';
       ctx.font = 'bold 20px serif';
-      ctx.fillText(emails[i].fullName, 240, 10, 200);
+      ctx.fillText(filteredMailList[i].fullName, 240, 10, 200);
       ctx.restore();
     }
-  }, []);
+  }, [filteredMailList] );
 
-  const update = () => {
-    const step = 360 / emails.length;
+  const update = useCallback(() => {
+    const step = 360 / filteredMailList.length;
     let startDegree = currentDegreeRef.current;
-    for (let i = 0; i < emails.length; i++) {
+    for (let i = 0; i < filteredMailList.length; i++) {
       const endDegree = startDegree + step;
       // Record the start degree and end degree of each item
-      itemDegreesRef.current[emails[i].email] = {
+      itemDegreesRef.current[filteredMailList[i].emailAddress] = {
         startDegree,
         endDegree,
       };
       startDegree = endDegree;
     }
-  };
+  },[filteredMailList]);
 
   const checkResult = () => {
     speedRef.current =
@@ -143,16 +146,16 @@ const PrizeWheel = () => {
         startDeg lies in the bottom-right quadrant (270°–360°).
         endDeg lies in the top-right quadrant (0°–90°).
       */
-      for (let i = 0; i < emails.length; i++) {
+      for (let i = 0; i < filteredMailList.length; i++) {
         const { startDegree, endDegree } =
-          itemDegreesRef.current[emails[i].email];
+          itemDegreesRef.current[filteredMailList[i].emailAddress];
         if (
           startDegree % 360 < 360 &&
           startDegree % 360 > 270 &&
           endDegree % 360 > 0 &&
           endDegree % 360 < 90
         ) {
-          setWinner(emails[i].fullName);
+          setWinner(filteredMailList[i].fullName);
           openPopup();
         }
       }
@@ -177,10 +180,10 @@ const PrizeWheel = () => {
   };
 
   useEffect(() => {
-    colorsRef.current = randomColors(emails.length);
+    colorsRef.current = randomColors(filteredMailList.length);
     update();
     draw();
-  }, [draw]); // runs once after the component mounts
+  }, [update, draw, filteredMailList]); // runs once after the component mounts
 
   return (
     <div className='bg-slate-950 h-full w-full grid place-items-center relative min-w-[800px] min-h-[800px]'>
