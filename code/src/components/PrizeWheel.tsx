@@ -197,7 +197,7 @@ const PrizeWheel = () => {
         isOpen={isPopupOpen}
         closePopup={closePopup}
       />
-      {error && <div className='text-red-500'>{error}</div>}
+      {error && <div className='absolute p-5 rounded-lg m-auto translate-y-[-100px] text-red-500 font-bold text-4xl bg-black/80'>{error}</div>}
       {isLoading ? (
         <div className='text-white'>Loading...</div>
       ) : (
@@ -212,7 +212,7 @@ const PrizeWheel = () => {
             className={`w-[100px] h-[100px] px-6 py-3 bg-blue-800 hover:bg-blue-700 rounded-full absolute m-auto  
           shadow-md hover:shadow-lg cursor-pointer 
           disabled:bg-gray-700 disabled:hover:bg-gray-700 disabled:cursor-not-allowed`}
-            disabled={isSpinningRef.current}
+            disabled={isSpinningRef.current || error!=null }
             onClick={() => spin()}
           ></button>
           <img

@@ -35,7 +35,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
         setIsLoading(true);
         delay(5);
         setEmails(emails);
-        setFilteredMailList(filterUnselectedMails());
+        setFilteredMailList(emails.filter(mail => mail.selected));
       } catch (error) {
         console.error(error);
         setError('Failed to fetch emails');
@@ -47,28 +47,24 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     fetchData();
   }, []);
 
-
   const toggleMailSelection = (emailAddress: string) => {
-    setMailList(prevMailList =>
-      prevMailList.map(mail =>
-        mail.emailAddress === emailAddress ? { ...mail, selected: !mail.selected } : mail
-      )
+    const newMailList = mailList.map(mail =>
+      mail.emailAddress === emailAddress ? { ...mail, selected: !mail.selected } : mail
     );
-    setFilteredMailList(filterUnselectedMails());
-  };
 
-  const filterUnselectedMails = () => {
-    return mailList.filter(mail => mail.selected);
+    setMailList(newMailList);
+    setFilteredMailList(newMailList.filter(mail => mail.selected));
   };
   const selectAll = () => {
-    setMailList(prevMailList =>
-      prevMailList.map(mail =>({ ...mail, selected: true }))
-    );
+    if (mailList.length === filteredMailList.length) return;
+    const newMailList = mailList.map(mail => ({ ...mail, selected: true }));
+    setMailList(newMailList);
+    setFilteredMailList(newMailList);
   };
 
   const setEmails = (emails: Email[]) => { 
     setMailList(emails);
-    setFilteredMailList(filterUnselectedMails());
+    setFilteredMailList(emails.filter(mail => mail.selected));
   };
 
   return (

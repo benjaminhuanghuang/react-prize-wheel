@@ -3,7 +3,7 @@ import { Email } from '@/types';
 import { useAppContext } from '../appContext';
 
 const EmailList = () => {
-  const { mailList, isLoading, toggleMailSelection, selectAll } =
+  const { mailList, filteredMailList, isLoading, toggleMailSelection, selectAll } =
     useAppContext();
 
   return (
@@ -27,8 +27,9 @@ const EmailList = () => {
           </div>
           <div className='buttons'>
             <button
-              className='bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600'
+              className='bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed'
               onClick={() => selectAll()}
+              disabled={mailList.length === filteredMailList.length}
             >
               Select All
             </button>
