@@ -1,21 +1,42 @@
-import { Email
-
- } from '@/types';
+import { Email } from '@/types';
 // Context
 import { useAppContext } from '../appContext';
 
 const EmailList = () => {
-  const { mailList } = useAppContext();
+  const { mailList, isLoading, toggleMailSelection, selectAll } =
+    useAppContext();
 
   return (
-    <div className="bg-slate-400 h-full w-full grid place-items-center relative min-w-[200px]">
-      {mailList.map((mail:Email) => (
-        <div key={mail.emailAddress}>
-          <span>{mail.fullName}</span>
-        </div>
-      ))}    
+    <div className='bg-slate-400 h-full w-full flex flex-col min-w-[200px] p-4 justify-between'>
+      {isLoading ? (
+        <div>Loading...</div>
+      ) : (
+        <>
+          {/* items */}
+          <div>
+            {mailList.map((mail: Email) => (
+              <div key={mail.emailAddress}>
+                <input
+                  type='checkbox'
+                  onChange={() => toggleMailSelection(mail.emailAddress)}
+                  checked={mail.selected}
+                />
+                <span>{mail.fullName}</span>
+              </div>
+            ))}
+          </div>
+          <div className='buttons'>
+            <button
+              className='bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600'
+              onClick={() => selectAll()}
+            >
+              Select All
+            </button>
+          </div>
+        </>
+      )}
     </div>
-  )
-}
+  );
+};
 
-export default EmailList
+export default EmailList;

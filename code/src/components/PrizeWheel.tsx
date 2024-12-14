@@ -20,7 +20,7 @@ const RADIUS = 400; // Wheel radius
 
 const PrizeWheel = () => {
   console.log('PrizeWheel is re-render');
-  const { filteredMailList } = useAppContext();
+  const { filteredMailList, isLoading, error } = useAppContext();
 
   const [isSheeringPlaying, toggleSheeringPlay] = useAudio(cheering);
   const [isSpinPlaying, toggleSpinPlay] = useAudio(spinmp3);
@@ -72,8 +72,10 @@ const PrizeWheel = () => {
 
     // Draw the wheel segments
     for (let i = 0; i < filteredMailList.length; i++) {
-      const startDegree = itemDegreesRef.current[filteredMailList[i].emailAddress].startDegree;
-      const endDegree = itemDegreesRef.current[filteredMailList[i].emailAddress].endDegree;
+      const startDegree =
+        itemDegreesRef.current[filteredMailList[i].emailAddress].startDegree;
+      const endDegree =
+        itemDegreesRef.current[filteredMailList[i].emailAddress].endDegree;
       const color = colorsRef.current[i];
       const colorStyle = `rgb(${color.r},${color.g},${color.b})`;
       // slightly darker
@@ -114,7 +116,7 @@ const PrizeWheel = () => {
       ctx.fillText(filteredMailList[i].fullName, 240, 10, 200);
       ctx.restore();
     }
-  }, [filteredMailList] );
+  }, [filteredMailList]);
 
   const update = useCallback(() => {
     const step = 360 / filteredMailList.length;
@@ -128,7 +130,7 @@ const PrizeWheel = () => {
       };
       startDegree = endDegree;
     }
-  },[filteredMailList]);
+  }, [filteredMailList]);
 
   const checkResult = () => {
     speedRef.current =
@@ -180,10 +182,12 @@ const PrizeWheel = () => {
   };
 
   useEffect(() => {
-    colorsRef.current = randomColors(filteredMailList.length);
-    update();
-    draw();
-  }, [update, draw, filteredMailList]); // runs once after the component mounts
+    if (!isLoading) {
+      colorsRef.current = randomColors(filteredMailList.length);
+      update();
+      draw();
+    }
+  }, [update, draw, filteredMailList, isLoading]); // runs once after the component mounts
 
   return (
     <div className='bg-slate-950 h-full w-full grid place-items-center relative min-w-[800px] min-h-[800px]'>
@@ -193,24 +197,31 @@ const PrizeWheel = () => {
         isOpen={isPopupOpen}
         closePopup={closePopup}
       />
-      <canvas
-        ref={canvasRef}
-        width='800'
-        height='800'
-        // className='bg-red-100'
-      />
-      <button
-        className={`w-[100px] h-[100px] px-6 py-3 bg-blue-800 hover:bg-blue-700 rounded-full absolute m-auto  
+      {error && <div className='text-red-500'>{error}</div>}
+      {isLoading ? (
+        <div className='text-white'>Loading...</div>
+      ) : (
+        <>
+          <canvas
+            ref={canvasRef}
+            width='800'
+            height='800'
+            // className='bg-red-100'
+          />
+          <button
+            className={`w-[100px] h-[100px] px-6 py-3 bg-blue-800 hover:bg-blue-700 rounded-full absolute m-auto  
           shadow-md hover:shadow-lg cursor-pointer 
           disabled:bg-gray-700 disabled:hover:bg-gray-700 disabled:cursor-not-allowed`}
-        disabled={isSpinningRef.current}
-        onClick={() => spin()}
-      ></button>
-      <img
-        src={pointer}
-        alt='pointer'
-        className='absolute m-auto translate-x-[380px]'
-      />
+            disabled={isSpinningRef.current}
+            onClick={() => spin()}
+          ></button>
+          <img
+            src={pointer}
+            alt='pointer'
+            className='absolute m-auto translate-x-[380px]'
+          />
+        </>
+      )}
     </div>
   );
 };

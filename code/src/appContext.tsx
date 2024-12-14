@@ -11,6 +11,7 @@ interface AppContextType {
   isLoading: boolean;
   error: string|null;
   toggleMailSelection: (emailAddress: string) => void;
+  selectAll: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -22,7 +23,7 @@ interface AppProviderProps {
 export const AppProvider = ({ children }: AppProviderProps) => {
   const [mailList, setMailList] = useState<Email[]>([]);
   const [filteredMailList, setFilteredMailList] = useState<Email[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   function delay(seconds: number): Promise<void> {
@@ -31,7 +32,8 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        delay(3);
+        setIsLoading(true);
+        delay(5);
         setEmails(emails);
         setFilteredMailList(filterUnselectedMails());
       } catch (error) {
@@ -58,6 +60,11 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   const filterUnselectedMails = () => {
     return mailList.filter(mail => mail.selected);
   };
+  const selectAll = () => {
+    setMailList(prevMailList =>
+      prevMailList.map(mail =>({ ...mail, selected: true }))
+    );
+  };
 
   const setEmails = (emails: Email[]) => { 
     setMailList(emails);
@@ -65,7 +72,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   };
 
   return (
-    <AppContext.Provider value={{ mailList, filteredMailList, isLoading, error, toggleMailSelection}}>
+    <AppContext.Provider value={{ mailList, filteredMailList, isLoading, error, toggleMailSelection, selectAll}}>
       {children}
     </AppContext.Provider>
   );
