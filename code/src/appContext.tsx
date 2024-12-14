@@ -12,6 +12,10 @@ interface AppContextType {
   error: string|null;
   toggleMailSelection: (emailAddress: string) => void;
   selectAll: () => void;
+  //
+  isSpinning: boolean;
+  setIsSpinning: (isSpinning: boolean) => void;
+  //
   authToken: string | null;
   login: (token: string) => void;
   logout: () => void;
@@ -24,6 +28,8 @@ interface AppProviderProps {
 }
 
 export const AppProvider = ({ children }: AppProviderProps) => {
+  // App status
+  const [isSpinning, setIsSpinning] = useState(false);
   // Data
   const [mailList, setMailList] = useState<Email[]>([]);
   const [filteredMailList, setFilteredMailList] = useState<Email[]>([]);
@@ -31,7 +37,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   const [error, setError] = useState<string | null>(null);
 
   //Auth
-  const [authToken, setAuthToken] = useState<string|null>(null);
+  const [authToken, setAuthToken] = useState<string|null>('token');
   const login = (token:string) => setAuthToken(token);
   const logout = () => setAuthToken(null);
 
@@ -39,6 +45,10 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
   }
   useEffect(() => {
+    /*
+      React state updates (setAuthToken) are asynchronous. 
+      If your component tries to access authToken immediately after setAuthToken, it might still be undefined.
+    */
     const fetchData = async () => {
       try {
         setIsLoading(true);
@@ -77,7 +87,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   };
 
   return (
-    <AppContext.Provider value={{ mailList, filteredMailList, isLoading, error, toggleMailSelection, selectAll, authToken, login, logout}}>
+    <AppContext.Provider value={{ mailList, filteredMailList, isLoading, error, toggleMailSelection, selectAll, authToken, login, logout, isSpinning, setIsSpinning}}>
       {children}
     </AppContext.Provider>
   );

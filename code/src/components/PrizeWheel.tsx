@@ -20,10 +20,10 @@ const RADIUS = 400; // Wheel radius
 
 const PrizeWheel = () => {
   console.log('PrizeWheel is re-render');
-  const { filteredMailList, isLoading, error } = useAppContext();
+  const { filteredMailList, isLoading, error, setIsSpinning } = useAppContext();
 
-  const [isSheeringPlaying, toggleSheeringPlay] = useAudio(cheering);
-  const [isSpinPlaying, toggleSpinPlay] = useAudio(spinmp3);
+  const [playSheeringAudio, stopSheeringAudio] = useAudio(cheering);
+  const [playSpinAudio, stopSpinAudio] = useAudio(spinmp3);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const colorsRef = useRef<Color[]>([]);
@@ -40,12 +40,12 @@ const PrizeWheel = () => {
   // Popup
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const openPopup = () => {
-    if (!isSheeringPlaying) toggleSheeringPlay();
+    playSheeringAudio();
     setIsPopupOpen(true);
   };
   const closePopup = () => {
     setIsPopupOpen(false);
-    if (isSheeringPlaying) toggleSheeringPlay();
+    stopSheeringAudio();
   };
 
   const draw = useCallback(() => {
@@ -142,7 +142,8 @@ const PrizeWheel = () => {
     if (speedRef.current < 0.01) {
       speedRef.current = 0;
       isSpinningRef.current = false;
-      if (isSpinPlaying) toggleSpinPlay();
+      setIsSpinning(false);
+      stopSpinAudio();
       /* 
       Check winner
         startDeg lies in the bottom-right quadrant (270°–360°).
@@ -174,7 +175,8 @@ const PrizeWheel = () => {
   };
 
   const spin = () => {
-    if (!isSpinPlaying) toggleSpinPlay();
+    // setIsSpinning(true);
+    playSpinAudio();
     isSpinningRef.current = true;
     currentDegreeRef.current = 0;
     maxRotationRef.current = randomRotation();
@@ -182,12 +184,12 @@ const PrizeWheel = () => {
   };
 
   useEffect(() => {
-    if (!isLoading) {
-      colorsRef.current = randomColors(filteredMailList.length);
-      update();
-      draw();
-    }
-  }, [update, draw, filteredMailList, isLoading]); // runs once after the component mounts
+    colorsRef.current = randomColors(filteredMailList.length);
+    speedRef.current = 0;
+    isSpinningRef.current = false;
+    update();
+    draw();
+  }, [update, draw, filteredMailList, isLoading, stopSheeringAudio, stopSpinAudio]); // runs once after the component mounts
 
   return (
     <div className='bg-slate-950 h-full w-full grid place-items-center relative min-w-[800px] min-h-[800px]'>
@@ -197,7 +199,11 @@ const PrizeWheel = () => {
         isOpen={isPopupOpen}
         closePopup={closePopup}
       />
-      {error && <div className='absolute p-5 rounded-lg m-auto translate-y-[-100px] text-red-500 font-bold text-4xl bg-black/80'>{error}</div>}
+      {error && (
+        <div className='absolute p-5 rounded-lg m-auto translate-y-[-100px] text-red-500 font-bold text-4xl bg-black/80'>
+          {error}
+        </div>
+      )}
       {isLoading ? (
         <div className='text-white'>Loading...</div>
       ) : (
@@ -212,7 +218,7 @@ const PrizeWheel = () => {
             className={`w-[100px] h-[100px] px-6 py-3 bg-blue-800 hover:bg-blue-700 rounded-full absolute m-auto  
           shadow-md hover:shadow-lg cursor-pointer 
           disabled:bg-gray-700 disabled:hover:bg-gray-700 disabled:cursor-not-allowed`}
-            disabled={isSpinningRef.current || error!=null }
+            disabled={isSpinningRef.current || error != null}
             onClick={() => spin()}
           ></button>
           <img
