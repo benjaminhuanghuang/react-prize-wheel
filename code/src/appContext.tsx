@@ -12,6 +12,9 @@ interface AppContextType {
   error: string|null;
   toggleMailSelection: (emailAddress: string) => void;
   selectAll: () => void;
+  authToken: string | null;
+  login: (token: string) => void;
+  logout: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -21,10 +24,16 @@ interface AppProviderProps {
 }
 
 export const AppProvider = ({ children }: AppProviderProps) => {
+  // Data
   const [mailList, setMailList] = useState<Email[]>([]);
   const [filteredMailList, setFilteredMailList] = useState<Email[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  //Auth
+  const [authToken, setAuthToken] = useState<string|null>(null);
+  const login = (token:string) => setAuthToken(token);
+  const logout = () => setAuthToken(null);
 
   function delay(seconds: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
@@ -68,7 +77,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   };
 
   return (
-    <AppContext.Provider value={{ mailList, filteredMailList, isLoading, error, toggleMailSelection, selectAll}}>
+    <AppContext.Provider value={{ mailList, filteredMailList, isLoading, error, toggleMailSelection, selectAll, authToken, login, logout}}>
       {children}
     </AppContext.Provider>
   );
