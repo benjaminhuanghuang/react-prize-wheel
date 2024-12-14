@@ -25,10 +25,10 @@ const PrizeWheel = () => {
   const itemDegreesRef = useRef<{
     [key: string]: { startDegree: number; endDegree: number };
   }>({});
+  const isSpinningRef = useRef(false);
 
   const [winner, setWinner] = useState('');
-  const [isSpinning, setIsSpinning] = useState(false);
-
+  
   // Popup
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const openPopup = () => setIsPopupOpen(true);
@@ -125,7 +125,7 @@ const PrizeWheel = () => {
 
     if (speedRef.current < 0.01) {
       speedRef.current = 0;
-      setIsSpinning(false);
+      isSpinningRef.current = false;
       /* 
       Check winner
         startDeg lies in the bottom-right quadrant (270°–360°).
@@ -147,7 +147,7 @@ const PrizeWheel = () => {
     }
   };
   const animate = () => {
-    if (!isSpinning) return;
+    if (!isSpinningRef.current) return;
     update();
     draw();
     checkResult();
@@ -158,10 +158,10 @@ const PrizeWheel = () => {
 
   const spin = () => {
     console.log('spin');
-    setIsSpinning(true);
+    isSpinningRef.current = true;
     currentDegreeRef.current = 0;
     maxRotationRef.current = randomRotation();
-    // window.requestAnimationFrame(animate);
+    window.requestAnimationFrame(animate);
   };
 
   useEffect(() => {
@@ -182,12 +182,13 @@ const PrizeWheel = () => {
         ref={canvasRef}
         width='800'
         height='800'
+        // className='bg-red-100'
       />
       <button
         className={`w-[100px] h-[100px] px-6 py-3 bg-blue-800 hover:bg-blue-700 rounded-full absolute m-auto  
           shadow-md hover:shadow-lg cursor-pointer 
           disabled:bg-gray-700 disabled:hover:bg-gray-700 disabled:cursor-not-allowed`}
-        disabled={isSpinning}
+        disabled={isSpinningRef.current}
         onClick={() => spin()}
       >
       </button>

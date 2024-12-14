@@ -27,8 +27,8 @@ export const randomRange = (min: number, max: number) =>
 */
 export const easeOutSine = (x: number) => Math.sin((x * Math.PI) / 2);
 
-export const getPercent = (value: number, max: number, min: number) =>
-  (value - min) / (max - min);
+export const getPercent = (value: number, min: number, max: number) =>
+  (((value - min) * 100) / (max - min))/100
 
 /*
   result is within the desired range (1080 to 2160).
