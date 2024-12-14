@@ -33,7 +33,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        delay(5);
+        await delay(3);
         setEmails(emails);
         setFilteredMailList(emails.filter(mail => mail.selected));
       } catch (error) {
