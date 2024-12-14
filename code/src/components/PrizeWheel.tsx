@@ -186,7 +186,7 @@ const PrizeWheel = () => {
       <button
         className={`w-[100px] h-[100px] px-6 py-3 bg-blue-800 hover:bg-blue-700 rounded-full absolute m-auto  
           shadow-md hover:shadow-lg cursor-pointer 
-          disabled:blue-500/10 disabled:hover:bg-blue-800 disabled:cursor-not-allowed`}
+          disabled:bg-gray-700 disabled:hover:bg-gray-700 disabled:cursor-not-allowed`}
         disabled={isSpinning}
         onClick={() => spin()}
       >
