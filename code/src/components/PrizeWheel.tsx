@@ -21,13 +21,12 @@ const PrizeWheel = () => {
   const colorsRef = useRef<Color[]>([]);
   const maxRotationRef = useRef(randomRotation());
   const currentDegreeRef = useRef(0);
-
-  const [winner, setWinner] = useState('');
-  const [speed, setSpeed] = useState<number>(0);
-  const itemDegs = useRef<{
-    [key: string]: { startDeg: number; endDeg: number };
+  const speedRef = useRef(0);
+  const itemDegreesRef = useRef<{
+    [key: string]: { startDegree: number; endDegree: number };
   }>({});
 
+  const [winner, setWinner] = useState('');
   const [isSpinning, setIsSpinning] = useState(false);
 
   // Popup
@@ -36,7 +35,6 @@ const PrizeWheel = () => {
   const closePopup = () => setIsPopupOpen(false);
 
   const draw = useCallback(() => {
-    console.log('draw');
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -47,9 +45,6 @@ const PrizeWheel = () => {
     const height = canvas.height;
     const centerX = width / 2;
     const centerY = height / 2;
-
-    const step = 360 / emails.length;
-    let startDeg = currentDegreeRef.current;
 
     // Clear canvas
     ctx.clearRect(0, 0, width, height);
@@ -62,8 +57,9 @@ const PrizeWheel = () => {
     ctx.fill();
 
     // Draw the wheel segments
-    for (let i = 0; i < emails.length; i++, startDeg += step) {
-      const endDeg = startDeg + step;
+    for (let i = 0; i < emails.length; i++) {
+      const startDegree = itemDegreesRef.current[emails[i].email].startDegree;
+      const endDegree = itemDegreesRef.current[emails[i].email].endDegree;
       const color = colorsRef.current[i];
       const colorStyle = `rgb(${color.r},${color.g},${color.b})`;
       // slightly darker
@@ -74,8 +70,8 @@ const PrizeWheel = () => {
         centerX,
         centerY,
         RADIUS - 2,
-        toRadius(startDeg),
-        toRadius(endDeg),
+        toRadius(startDegree),
+        toRadius(endDegree),
       );
       ctx.fillStyle = colorStyle2;
       ctx.lineTo(centerX, centerY);
@@ -86,8 +82,8 @@ const PrizeWheel = () => {
         centerX,
         centerY,
         RADIUS - 30,
-        toRadius(startDeg),
-        toRadius(endDeg),
+        toRadius(startDegree),
+        toRadius(endDegree),
       );
       ctx.fillStyle = colorStyle;
       ctx.lineTo(centerX, centerY);
@@ -96,72 +92,86 @@ const PrizeWheel = () => {
       // Draw text
       ctx.save();
       ctx.translate(centerX, centerY);
-      ctx.rotate(toRadius((startDeg + endDeg) / 2));
+      ctx.rotate(toRadius((startDegree + endDegree) / 2));
       ctx.textAlign = 'center';
       ctx.fillStyle =
         color.r > 150 || color.g > 150 || color.b > 150 ? '#000' : '#fff';
       ctx.font = 'bold 20px serif';
       ctx.fillText(emails[i].fullName, 240, 10, 200);
       ctx.restore();
+    }
+  }, []);
 
+  const update = () => {
+    const step = 360 / emails.length;
+    let startDegree = currentDegreeRef.current;
+    for (let i = 0; i < emails.length; i++) {
+      const endDegree = startDegree + step;
       // Record the start degree and end degree of each item
-      itemDegs.current[emails[i].email] = {
-        startDeg,
-        endDeg,
+      itemDegreesRef.current[emails[i].email] = {
+        startDegree,
+        endDegree,
       };
+      startDegree = endDegree;
+    }
+  };
 
+  const checkResult = () => {
+    speedRef.current =
+      easeOutSine(
+        getPercent(currentDegreeRef.current, maxRotationRef.current, 0),
+      ) * 20;
+    currentDegreeRef.current = currentDegreeRef.current + speedRef.current;
+
+    if (speedRef.current < 0.01) {
+      speedRef.current = 0;
+      setIsSpinning(false);
       /* 
       Check winner
         startDeg lies in the bottom-right quadrant (270°–360°).
         endDeg lies in the top-right quadrant (0°–90°).
       */
-      if (
-        startDeg % 360 < 360 &&
-        startDeg % 360 > 270 &&
-        endDeg % 360 > 0 &&
-        endDeg % 360 < 90
-      ) {
-        setWinner(emails[i].fullName);
-        openPopup();
-        setIsSpinning(false);
+      for (let i = 0; i < emails.length; i++) {
+        const { startDegree, endDegree } =
+          itemDegreesRef.current[emails[i].email];
+        if (
+          startDegree % 360 < 360 &&
+          startDegree % 360 > 270 &&
+          endDegree % 360 > 0 &&
+          endDegree % 360 < 90
+        ) {
+          setWinner(emails[i].fullName);
+          openPopup();
+        }
       }
     }
-  }, []);
-
+  };
   const animate = () => {
-    // if (!isSpinning) return;
-    console.log("--------animate");
-    setSpeed(
-      easeOutSine(
-        getPercent(currentDegreeRef.current, maxRotationRef.current, 0),
-      ) * 20,
-    );
+    if (!isSpinning) return;
+    update();
+    draw();
+    checkResult();
 
-    if (speed < 0.01) {
-      setSpeed(0);
-      setIsSpinning(false);
-    }
-    currentDegreeRef.current = currentDegreeRef.current + speed;
     draw();
     window.requestAnimationFrame(animate);
   };
 
   const spin = () => {
+    console.log('spin');
     setIsSpinning(true);
     currentDegreeRef.current = 0;
-
-    draw();
     maxRotationRef.current = randomRotation();
-    window.requestAnimationFrame(animate);
+    // window.requestAnimationFrame(animate);
   };
 
   useEffect(() => {
     colorsRef.current = randomColors(emails.length);
+    update();
     draw();
   }, [draw]); // runs once after the component mounts
 
   return (
-    <div className='bg-slate-950 flex-1 grid place-items-center relative'>
+    <div className='bg-slate-950 h-full w-full grid place-items-center relative min-w-[800px] min-h-[800px]'>
       <Popup
         title='The Winner is:'
         message={winner}
@@ -173,18 +183,25 @@ const PrizeWheel = () => {
         width='800'
         height='800'
       />
-      <div
-        className={`w-[100px] h-[100px] rounded-full bg-white absolute m-auto
-          ${isSpinning ? 'bg-slate-500 cursor-not-allowed pointer-events-none' : 'hover:bg-red-500 cursor-pointer'}`}
+      <button
+        className={`w-[100px] h-[100px] px-6 py-3 bg-blue-800 hover:bg-blue-700 rounded-full absolute m-auto  
+          shadow-md hover:shadow-lg cursor-pointer 
+          disabled:blue-500/10 disabled:hover:bg-blue-800 disabled:cursor-not-allowed`}
+        disabled={isSpinning}
         onClick={() => spin()}
-      ></div>
+      >
+      </button>
       <img
-        src={pointer}
-        alt='pointer'
-        className='absolute mt-auto right-[410px]'
-      />
+          src={pointer}
+          alt='pointer'
+          className='absolute m-auto translate-x-[380px]'
+        />
     </div>
   );
 };
 
 export default PrizeWheel;
+
+/*
+text-white font-semibold 
+*/
