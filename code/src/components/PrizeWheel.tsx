@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
-
+import useAudio from '../hooks/useAudio';
 import { Color } from '../types';
 import { emails } from '../emails';
 import {
@@ -12,11 +12,16 @@ import {
 import Popup from './Popup';
 // Assets
 import pointer from '../assets/pointer.svg';
+import cheering from '../assets/cheering.mp3';
+import spinmp3 from '../assets/spin.mp3';
 
 const RADIUS = 400; // Wheel radius
 
 const PrizeWheel = () => {
   console.log('PrizeWheel is re-render');
+  const [isSheeringPlaying, toggleSheeringPlay] = useAudio(cheering);
+  const [isSpinPlaying, toggleSpinPlay] = useAudio(spinmp3);
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const colorsRef = useRef<Color[]>([]);
   const maxRotationRef = useRef(randomRotation());
@@ -28,11 +33,17 @@ const PrizeWheel = () => {
   const isSpinningRef = useRef(false);
 
   const [winner, setWinner] = useState('');
-  
+
   // Popup
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const openPopup = () => setIsPopupOpen(true);
-  const closePopup = () => setIsPopupOpen(false);
+  const openPopup = () => {
+    if (!isSheeringPlaying) toggleSheeringPlay();
+    setIsPopupOpen(true);
+  };
+  const closePopup = () => {
+    setIsPopupOpen(false);
+    if (isSheeringPlaying) toggleSheeringPlay();
+  };
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
@@ -126,6 +137,7 @@ const PrizeWheel = () => {
     if (speedRef.current < 0.01) {
       speedRef.current = 0;
       isSpinningRef.current = false;
+      if (isSpinPlaying) toggleSpinPlay();
       /* 
       Check winner
         startDeg lies in the bottom-right quadrant (270°–360°).
@@ -157,6 +169,7 @@ const PrizeWheel = () => {
   };
 
   const spin = () => {
+    if (!isSpinPlaying) toggleSpinPlay();
     isSpinningRef.current = true;
     currentDegreeRef.current = 0;
     maxRotationRef.current = randomRotation();
@@ -189,13 +202,12 @@ const PrizeWheel = () => {
           disabled:bg-gray-700 disabled:hover:bg-gray-700 disabled:cursor-not-allowed`}
         disabled={isSpinningRef.current}
         onClick={() => spin()}
-      >
-      </button>
+      ></button>
       <img
-          src={pointer}
-          alt='pointer'
-          className='absolute m-auto translate-x-[380px]'
-        />
+        src={pointer}
+        alt='pointer'
+        className='absolute m-auto translate-x-[380px]'
+      />
     </div>
   );
 };
