@@ -175,7 +175,7 @@ const PrizeWheel = () => {
   };
 
   const spin = () => {
-    // setIsSpinning(true);
+    setIsSpinning(true);
     playSpinAudio();
     isSpinningRef.current = true;
     currentDegreeRef.current = 0;
@@ -189,7 +189,7 @@ const PrizeWheel = () => {
     isSpinningRef.current = false;
     update();
     draw();
-  }, [update, draw, filteredMailList, isLoading, stopSheeringAudio, stopSpinAudio]); // runs once after the component mounts
+  }, [update, draw, filteredMailList, isLoading]); // runs once after the component mounts
 
   return (
     <div className='bg-slate-950 h-full w-full grid place-items-center relative min-w-[800px] min-h-[800px]'>

@@ -20,6 +20,7 @@ const useAudio = (
   const play = () => {
     const audio = audioRef.current;
     if (!audio) return;
+    audio.currentTime = 0;
     audio.play();
   };
   const pause = () => {
