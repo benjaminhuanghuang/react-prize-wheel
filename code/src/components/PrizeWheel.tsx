@@ -113,7 +113,7 @@ const PrizeWheel = () => {
       ctx.fillStyle =
         color.r > 150 || color.g > 150 || color.b > 150 ? '#000' : '#fff';
       ctx.font = 'bold 20px serif';
-      ctx.fillText(filteredMailList[i].fullName, 240, 10, 200);
+      ctx.fillText(filteredMailList[i].fullName, 300, 10, 200);
       ctx.restore();
     }
   }, [filteredMailList]);

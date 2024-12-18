@@ -1,6 +1,4 @@
-import { Email } from './types';
-
-export const emails: Email[] =[
+[
   {
     "fullName": "alex.wu",
     "emailAddress": "alex.wu@zoom.com",
